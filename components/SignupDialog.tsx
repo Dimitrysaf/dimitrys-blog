@@ -16,10 +16,20 @@ import React, { useState, useEffect } from "react"
 import validator from "validator"
 import { Check, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { signIn } from "next-auth/react"
 
 interface SignupDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+}
+
+// Define a type for our form errors for type safety
+interface FormErrors {
+  username?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  form?: string; // For general form-level errors
 }
 
 export default function SignupDialog({ open, onOpenChange }: SignupDialogProps) {
@@ -27,13 +37,15 @@ export default function SignupDialog({ open, onOpenChange }: SignupDialogProps) 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  const [errors, setErrors] = useState<any>({})
+  // Use our new FormErrors type for the state
+  const [errors, setErrors] = useState<FormErrors>({})
   const [showPasswordRequirements, setShowPasswordRequirements] =
     useState(false)
-  const [touched, setTouched] = useState<any>({})
+  const [touched, setTouched] = useState<{ [key: string]: boolean }>({})
 
   const validate = (isSubmitting: boolean) => {
-    const newErrors: any = {}
+    // Use our new FormErrors type for the newErrors object
+    const newErrors: FormErrors = {}
 
     // Username validation
     if (touched.username || isSubmitting) {
@@ -85,6 +97,11 @@ export default function SignupDialog({ open, onOpenChange }: SignupDialogProps) 
   }
 
   useEffect(() => {
+    // Clear form-level error when inputs change
+    if (errors.form) {
+        // By typing the state, TypeScript now understands the shape here, fixing the error.
+        setErrors(({ form, ...rest }) => rest);
+    }
     validate(false)
   }, [username, email, password, confirmPassword, touched])
 
@@ -96,7 +113,7 @@ export default function SignupDialog({ open, onOpenChange }: SignupDialogProps) 
     })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setTouched({
       username: true,
@@ -104,9 +121,40 @@ export default function SignupDialog({ open, onOpenChange }: SignupDialogProps) 
       password: true,
       confirmPassword: true,
     })
+
     if (validate(true)) {
-      // Submit form
-      console.log("Form submitted")
+      try {
+        const response = await fetch("/api/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, email, password }),
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          setErrors({ ...errors, form: data.message || "An unknown error occurred." })
+          return
+        }
+
+        const signInResponse = await signIn("credentials", {
+          redirect: false,
+          email,
+          password,
+        })
+
+        if (signInResponse?.error) {
+          setErrors({ ...errors, form: `Sign-in failed: ${signInResponse.error}` })
+          return
+        }
+
+        onOpenChange(false)
+        window.location.reload()
+
+      } catch (error) {
+        console.error("Signup fetch error:", error)
+        setErrors({ ...errors, form: "Could not connect to the server." })
+      }
     }
   }
 
@@ -239,6 +287,9 @@ export default function SignupDialog({ open, onOpenChange }: SignupDialogProps) 
               )}
             </div>
           </div>
+          {errors.form && (
+            <p className="text-red-500 text-sm text-center mb-4">{errors.form}</p>
+          )}
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="neutral">Άκυρο</Button>
