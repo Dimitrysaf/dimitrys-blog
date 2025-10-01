@@ -45,3 +45,4 @@ docs/
 .gitignore
 .vscode/
 .idx/
+/lib/generated/prisma

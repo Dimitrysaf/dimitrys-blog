@@ -1,0 +1,87 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+model User {
+  id          String   @id @default(uuid())
+  username    String   @unique
+  email       String   @unique
+  passwordHash String
+  role        Role     @relation(fields: [roleId], references: [id])
+  roleId      Int
+  posts       Post[]
+  comments    Comment[]
+  likes       Like[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Role {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+  users       User[]
+}
+
+model Post {
+  id          String    @id @default(uuid())
+  author      User      @relation(fields: [authorId], references: [id])
+  authorId    String
+  title       String
+  slug        String    @unique
+  content     String
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  tags        PostTags[]
+  comments    Comment[]
+  likes       Like[]
+
+  @@index([authorId])
+}
+
+model Tag {
+  id    Int        @id @default(autoincrement())
+  name  String     @unique
+  posts PostTags[]
+}
+
+model PostTags {
+  post   Post @relation(fields: [postId], references: [id])
+  postId String
+  tag    Tag  @relation(fields: [tagId], references: [id])
+  tagId  Int
+
+  @@id([postId, tagId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    String
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+  parent    Comment? @relation("CommentThread", fields: [parentId], references: [id])
+  parentId  String?
+  children  Comment[] @relation("CommentThread")
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Like {
+  user   User @relation(fields: [userId], references: [id])
+  userId String
+  post   Post @relation(fields: [postId], references: [id])
+  postId String
+  createdAt DateTime @default(now())
+
+  @@id([userId, postId])
+}

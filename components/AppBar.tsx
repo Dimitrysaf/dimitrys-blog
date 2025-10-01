@@ -2,6 +2,7 @@ import React from 'react';
 import Container from './Container';
 import Link from 'next/link';
 import SearchButton from './SearchButton';
+import Menu from './Menu';
 
 const AppBar: React.FC = () => {
   return (
@@ -14,7 +15,10 @@ const AppBar: React.FC = () => {
               <div className="font-['Times_New_Roman',_serif] leading-tight text-sm">του Δημήτρη</div>
             </h1>
           </Link>
-          <SearchButton />
+          <div className="flex items-center gap-4">
+            <SearchButton />
+            <Menu />
+          </div>
         </div>
       </Container>
     </header>
