@@ -19,6 +19,7 @@
   --chart-4: #05E17A;
   --chart-5: #7A83FF;
   --chart-active-dot: #000;
+  --grid-line-color: oklch(0% 0 0 / 0.05);
 }
 
 .dark {
@@ -36,6 +37,7 @@
   --chart-4: #04C86D;
   --chart-5: #7A83FF;
   --chart-active-dot: #fff;
+  --grid-line-color: oklch(92.49% 0 0 / 0.05);
 }
 
 @theme inline {
@@ -65,10 +67,23 @@
   
 @layer base {
   body {
-    @apply text-foreground font-base bg-background;
+    @apply text-foreground font-base;
   }
 
   h1, h2, h3, h4, h5, h6{
     @apply font-heading;
   }
+}
+
+body {
+  background-color: var(--color-background);
+  background-image:
+    linear-gradient(var(--grid-line-color) 1px, transparent 1px),
+    linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.app-bar {
+  height: 70px;
+  background-color: var(--secondary-background);
 }
