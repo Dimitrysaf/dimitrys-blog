@@ -41,7 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 # Custom
-Docs/
+docs/
 .gitignore
 .vscode/
 .idx/
