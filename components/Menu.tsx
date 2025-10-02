@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useSession, signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -18,9 +19,9 @@ import LoginDialog from './LoginDialog'
 import SignupDialog from './SignupDialog'
 
 export default function Menu() {
-  // For demonstration purposes, we'll simulate the login state.
-  // In a real application, this would come from your auth provider.
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false)
+  const { data: session, status } = useSession()
+  const isLoggedIn = status === 'authenticated'
+
   const [theme, setTheme] = React.useState('light')
   const [isLoginDialogOpen, setIsLoginDialogOpen] = React.useState(false)
   const [isSignupDialogOpen, setIsSignupDialogOpen] = React.useState(false)
@@ -55,57 +56,50 @@ export default function Menu() {
         <DropdownMenuContent className="w-56">
           {isLoggedIn ? (
             <DropdownMenuGroup>
-              <DropdownMenuLabel>Ο λογαριασμός μου</DropdownMenuLabel>
-              <DropdownMenuSeparator />
               <DropdownMenuItem className="cursor-pointer">
                 <User className="mr-2 h-4 w-4" />
-                <span>Λογαριασμός</span>
+                <span>Ο λογαριασμός μου</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => signOut()}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Αποσύνδεση</span>
               </DropdownMenuItem>
             </DropdownMenuGroup>
           ) : (
             <DropdownMenuGroup>
               <DropdownMenuItem
                 className="cursor-pointer"
-                onClick={() => setIsLoginDialogOpen(true)}>
+                onClick={() => setIsLoginDialogOpen(true)}
+              >
                 <LogIn className="mr-2 h-4 w-4" />
                 <span>Σύνδεση</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer"
-                onClick={() => setIsSignupDialogOpen(true)}>
+                onClick={() => setIsSignupDialogOpen(true)}
+              >
                 <UserPlus className="mr-2 h-4 w-4" />
                 <span>Εγγραφή</span>
               </DropdownMenuItem>
             </DropdownMenuGroup>
           )}
+
           <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            <DropdownMenuLabel className="flex items-center">
-              <Palette className="mr-2 h-4 w-4" />
-              <span>Εμφάνιση</span>
+          <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+            <DropdownMenuLabel>
+              <Palette className="mr-2 h-4 w-4 inline-block" />
+              <span>Θέμα</span>
             </DropdownMenuLabel>
-            <DropdownMenuRadioGroup
-              value={theme}
-              onValueChange={value => setTheme(value as 'light' | 'dark')}>
-              <DropdownMenuRadioItem value="light" className="cursor-pointer">Φωτεινό</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="dark" className="cursor-pointer">Σκοτεινό</DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuGroup>
-          {isLoggedIn && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => setIsLoggedIn(false)}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Αποσύνδεση</span>
-              </DropdownMenuItem>
-            </>
-          )}
+            <DropdownMenuRadioItem value="light">Φωτεινό</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="dark">Σκοτεινό</DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
         </DropdownMenuContent>
       </DropdownMenu>
       <LoginDialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen} />
-      <SignupDialog open={isSignupDialogOpen} onOpenChange={setIsSignupDialogOpen} />
+      <SignupDialog
+        open={isSignupDialogOpen}
+        onOpenChange={setIsSignupDialogOpen}
+      />
     </>
   )
 }

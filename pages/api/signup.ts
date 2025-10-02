@@ -20,7 +20,6 @@ export default async function handler(
       return res.status(400).json({ message: 'Email, password, and username are required.' });
     }
 
-    // Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [
@@ -34,11 +33,8 @@ export default async function handler(
       return res.status(409).json({ message: 'User with this email or username already exists.' });
     }
 
-    // Hash the password
     const passwordHash = await hashPassword(password);
 
-    // Create the user
-    // ASSUMPTION: A default role for new users exists with id = 1.
     const user = await prisma.user.create({
       data: {
         username,
@@ -48,13 +44,13 @@ export default async function handler(
       },
     });
 
-    // Do not send the password hash back to the client
+    // Return the new user, excluding the password hash
     const { passwordHash: _, ...userWithoutPassword } = user;
 
-    return res.status(201).json({ user: userWithoutPassword });
+    res.status(201).json(userWithoutPassword);
 
   } catch (error) {
-    console.error('Signup Error:', error);
-    return res.status(500).json({ message: 'An error occurred during registration.' });
+    console.error('Signup API error:', error);
+    res.status(500).json({ message: 'An error occurred while creating the user.' });
   }
 }
