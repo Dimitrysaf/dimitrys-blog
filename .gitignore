@@ -46,3 +46,4 @@ docs/
 .vscode/
 .idx/
 /lib/generated/prisma
+*.log

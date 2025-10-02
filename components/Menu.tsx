@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import {
@@ -86,10 +87,12 @@ export default function Menu() {
           <DropdownMenuContent className="w-56">
             {isLoggedIn ? (
               <DropdownMenuGroup>
-                <DropdownMenuItem className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Ο λογαριασμός μου</span>
-                </DropdownMenuItem>
+                 <Link href={`/u/${session.user.id}`} passHref>
+                    <DropdownMenuItem className="cursor-pointer">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Ο λογαριασμός μου</span>
+                    </DropdownMenuItem>
+                 </Link>
                 <DropdownMenuItem
                   className="cursor-pointer"
                   onClick={() => setIsSettingsDialogOpen(true)}

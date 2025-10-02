@@ -77,8 +77,16 @@ export default function SettingsDialog({
   const { data: session, update: updateSession } = useSession()
   const [isLoading, setIsLoading] = React.useState(false)
   const [username, setUsername] = React.useState('')
+  const [initialUsername, setInitialUsername] = React.useState('')
   const [userId, setUserId] = React.useState('')
   const [password, setPassword] = React.useState('')
+
+  const usernameError = React.useMemo(() => {
+    if (username.trim() === '') {
+        return 'Το όνομα χρήστη δεν μπορεί να είναι κενό.';
+    }
+    return null;
+  }, [username]);
 
   React.useEffect(() => {
     if (open) {
@@ -88,6 +96,7 @@ export default function SettingsDialog({
       setIsLoading(true);
       fetchUserSettings().then(data => {
         setUsername(data.username);
+        setInitialUsername(data.username);
         setIsLoading(false);
       }).catch(err => {
         toast.error(err.message || 'Could not fetch user data.');
@@ -133,6 +142,8 @@ export default function SettingsDialog({
     });
   }
 
+  const isSaveDisabled = isLoading || !!usernameError || username === initialUsername;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -152,7 +163,9 @@ export default function SettingsDialog({
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               disabled={isLoading}
+              maxLength={35}
             />
+            {usernameError && <p className="text-sm text-destructive mt-1">{usernameError}</p>}
           </div>
           <div className="grid gap-1.5">
             <Label htmlFor="uuid">Αναγνωριστικό</Label>
@@ -203,7 +216,7 @@ export default function SettingsDialog({
               Άκυρο
             </Button>
           </DialogClose>
-          <Button type="submit" onClick={handleSave} disabled={isLoading}>
+          <Button type="submit" onClick={handleSave} disabled={isSaveDisabled}>
             Αποθήκευση
           </Button>
         </DialogFooter>
