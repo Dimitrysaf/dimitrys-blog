@@ -25,9 +25,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { LogIn, LogOut, Palette, User, UserPlus } from 'lucide-react'
+import { LogIn, LogOut, Palette, Settings, User, UserPlus } from 'lucide-react'
 import LoginDialog from './LoginDialog'
 import SignupDialog from './SignupDialog'
+import SettingsDialog from './SettingsDialog'
 import { toast } from 'sonner'
 
 export default function Menu() {
@@ -38,6 +39,7 @@ export default function Menu() {
   const [theme, setTheme] = React.useState('light')
   const [isLoginDialogOpen, setIsLoginDialogOpen] = React.useState(false)
   const [isSignupDialogOpen, setIsSignupDialogOpen] = React.useState(false)
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = React.useState(false)
 
   React.useEffect(() => {
     const isDark =
@@ -63,11 +65,11 @@ export default function Menu() {
     const promise = signOut({ redirect: false })
 
     toast.promise(promise, {
-      loading: "Αποσύνδεση...",
+      loading: 'Αποσύνδεση...',
       success: () => {
-        return "Έχετε αποσυνδεθεί"
+        return 'Έχετε αποσυνδεθεί'
       },
-      error: "Αποτυχία αποσύνδεσης",
+      error: 'Αποτυχία αποσύνδεσης',
       finally: () => setIsLoading(false),
     })
   }
@@ -87,6 +89,13 @@ export default function Menu() {
                 <DropdownMenuItem className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
                   <span>Ο λογαριασμός μου</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => setIsSettingsDialogOpen(true)}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Ρυθμίσεις</span>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             ) : (
@@ -142,7 +151,9 @@ export default function Menu() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isLoading}>Άκυρο</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSignOut} disabled={isLoading}>Αποσύνδεση</AlertDialogAction>
+            <AlertDialogAction onClick={handleSignOut} disabled={isLoading}>
+              Αποσύνδεση
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -150,6 +161,10 @@ export default function Menu() {
       <SignupDialog
         open={isSignupDialogOpen}
         onOpenChange={setIsSignupDialogOpen}
+      />
+      <SettingsDialog
+        open={isSettingsDialogOpen}
+        onOpenChange={setIsSettingsDialogOpen}
       />
     </>
   )
