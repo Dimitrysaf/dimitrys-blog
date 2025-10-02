@@ -1,13 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
-import { getSession } from 'next-auth/react';
-
-const prisma = new PrismaClient();
+import { getServerSession } from "next-auth/next"
+import { authOptions } from '../auth/[...nextauth]'
+import prisma from '../../../lib/prisma';
 
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getSession({ req });
+  const session = await getServerSession(req, res, authOptions)
 
-  if (!session || !session.user || !session.user.id) {
+  if (!session || !session.user?.id) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
@@ -24,6 +23,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
 
       res.status(200).json({ username: user.username });
     } catch (error) {
+      console.error("Fetch user API error:", error);
       res.status(500).json({ message: 'Something went wrong' });
     }
   } else {
