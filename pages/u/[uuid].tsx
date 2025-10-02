@@ -4,10 +4,16 @@ import Banner from '../../components/Banner';
 import { ShieldCheck, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface User {
     username: string;
-    role: { name: string };
+    role: { name: string; description: string | null };
     createdAt: string;
 }
 
@@ -62,25 +68,41 @@ const UserProfilePage = () => {
     }
 
     return (
-        <div className="relative">
-            <Banner>
-                <div className="w-full text-center">
-                    <h1 className="text-4xl font-bold" style={{ fontFamily: 'Times New Roman, serif' }}>
-                        {user.username}
-                    </h1>
+        <TooltipProvider>
+            <div className="relative">
+                <Banner>
+                    <div className="w-full text-center">
+                        <h1 className="text-4xl font-bold" style={{ fontFamily: 'Times New Roman, serif', wordBreak: 'break-word' }}>
+                            {user.username}
+                        </h1>
+                    </div>
+                </Banner>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-wrap items-center justify-center gap-2">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Badge variant="neutral" className="cursor-pointer">
+                                <ShieldCheck className="mr-2 h-4 w-4" />
+                                {user.role.name}
+                            </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>{user.role.description || 'No description available'}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Badge variant="neutral" className="cursor-pointer">
+                                <Calendar className="mr-2 h-4 w-4" />
+                                {formatCreatedAt(user.createdAt)}
+                            </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Ημερομηνία δημιουργίας λογαριασμού</p>
+                        </TooltipContent>
+                    </Tooltip>
                 </div>
-            </Banner>
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center justify-center gap-2">
-                <Badge variant="neutral">
-                    <ShieldCheck className="mr-2 h-4 w-4" />
-                    {user.role.name}
-                </Badge>
-                <Badge variant="neutral">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {formatCreatedAt(user.createdAt)}
-                </Badge>
             </div>
-        </div>
+        </TooltipProvider>
     );
 };
 

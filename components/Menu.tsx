@@ -26,7 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { LogIn, LogOut, Palette, Settings, User, UserPlus } from 'lucide-react'
+import { LayoutDashboard, LogIn, LogOut, Palette, Settings, User, UserPlus } from 'lucide-react'
 import LoginDialog from './LoginDialog'
 import SignupDialog from './SignupDialog'
 import SettingsDialog from './SettingsDialog'
@@ -75,6 +75,8 @@ export default function Menu() {
     })
   }
 
+  const userIsAdminOrAuthor = isLoggedIn && [2, 3].includes((session?.user as any)?.roleId);
+
   return (
     <>
       <AlertDialog>
@@ -87,12 +89,20 @@ export default function Menu() {
           <DropdownMenuContent className="w-56">
             {isLoggedIn ? (
               <DropdownMenuGroup>
-                 <Link href={`/u/${session.user.id}`} passHref>
-                    <DropdownMenuItem className="cursor-pointer">
+                {userIsAdminOrAuthor && (
+                    <DropdownMenuItem asChild>
+                        <Link href="/dashboard" className="cursor-pointer">
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            <span>Ταμπλό</span>
+                        </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem asChild>
+                    <Link href={`/u/${session.user.id}`} className="cursor-pointer">
                         <User className="mr-2 h-4 w-4" />
                         <span>Ο λογαριασμός μου</span>
-                    </DropdownMenuItem>
-                 </Link>
+                    </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   className="cursor-pointer"
                   onClick={() => setIsSettingsDialogOpen(true)}
