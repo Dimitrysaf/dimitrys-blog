@@ -26,7 +26,6 @@ const SearchButton: React.FC = () => {
         <>
             <Button onClick={() => setOpen(true)} variant="neutral" className="flex items-center gap-2 cursor-pointer">
                 <Search className="h-4 w-4" />
-                <span>Αναζήτηση</span>
             </Button>
             <CommandDialog open={open} onOpenChange={setOpen}>
                 <CommandInput placeholder="Πληκτρολογήστε για να αναζητήσετε..." />
