@@ -24,7 +24,7 @@ const SearchButton: React.FC = () => {
 
     return (
         <>
-            <Button onClick={() => setOpen(true)} variant="neutral" className="flex items-center gap-2 cursor-pointer">
+            <Button onClick={() => setOpen(true)} variant="neutral" size="icon" className="flex items-center cursor-pointer">
                 <Search className="h-4 w-4" />
             </Button>
             <CommandDialog open={open} onOpenChange={setOpen}>
