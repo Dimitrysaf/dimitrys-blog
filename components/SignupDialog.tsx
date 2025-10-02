@@ -17,19 +17,18 @@ import validator from "validator"
 import { Check, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { signIn } from "next-auth/react"
+import { toast } from "sonner"
 
 interface SignupDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-// Define a type for our form errors for type safety
 interface FormErrors {
-  username?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-  form?: string; // For general form-level errors
+  username?: string
+  email?: string
+  password?: string
+  confirmPassword?: string
 }
 
 export default function SignupDialog({ open, onOpenChange }: SignupDialogProps) {
@@ -37,29 +36,27 @@ export default function SignupDialog({ open, onOpenChange }: SignupDialogProps) 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  // Use our new FormErrors type for the state
   const [errors, setErrors] = useState<FormErrors>({})
   const [showPasswordRequirements, setShowPasswordRequirements] =
     useState(false)
   const [touched, setTouched] = useState<{ [key: string]: boolean }>({})
+  const [isLoading, setIsLoading] = useState(false)
 
   const validate = (isSubmitting: boolean) => {
-    // Use our new FormErrors type for the newErrors object
     const newErrors: FormErrors = {}
 
-    // Username validation
     if (touched.username || isSubmitting) {
       if (!username) {
         newErrors.username = "Το πεδίο αυτό απαιτείται"
       } else if (username.length > 35) {
-        newErrors.username = "Το όνομα χρήστη δεν μπορεί να υπερβαίνει τους 35 χαρακτήρες."
+        newErrors.username =
+          "Το όνομα χρήστη δεν μπορεί να υπερβαίνει τους 35 χαρακτήρες."
       } else if (!/^[\u0370-\u03ff\u1f00-\u1fff a-zA-Z]+$/.test(username)) {
         newErrors.username =
           "Το όνομα χρήστη πρέπει να περιέχει μόνο ελληνικούς/αγγλικούς χαρακτήρες και κενά."
       }
     }
 
-    // Email validation
     if (touched.email || isSubmitting) {
       if (!email) {
         newErrors.email = "Το πεδίο αυτό απαιτείται"
@@ -70,20 +67,21 @@ export default function SignupDialog({ open, onOpenChange }: SignupDialogProps) 
       }
     }
 
-    // Password validation
     if (touched.password || isSubmitting) {
       if (!password) {
         newErrors.password = "Το πεδίο αυτό απαιτείται"
       } else if (password.length < 5) {
-        newErrors.password = "Ο κωδικός πρόσβασης πρέπει να έχει τουλάχιστον 5 χαρακτήρες."
+        newErrors.password =
+          "Ο κωδικός πρόσβασης πρέπει να έχει τουλάχιστον 5 χαρακτήρες."
       } else if (!/\d/.test(password)) {
-        newErrors.password = "Ο κωδικός πρόσβασης πρέπει να περιέχει τουλάχιστον έναν αριθμό."
+        newErrors.password =
+          "Ο κωδικός πρόσβασης πρέπει να περιέχει τουλάχιστον έναν αριθμό."
       } else if (!/[a-zA-Z]/.test(password)) {
-        newErrors.password = "Ο κωδικός πρόσβασης πρέπει να περιέχει τουλάχιστον ένα γράμμα."
+        newErrors.password =
+          "Ο κωδικός πρόσβασης πρέπει να περιέχει τουλάχιστον ένα γράμμα."
       }
     }
 
-    // Confirm password validation
     if (touched.confirmPassword || isSubmitting) {
       if (!confirmPassword) {
         newErrors.confirmPassword = "Το πεδίο αυτό απαιτείται"
@@ -97,11 +95,6 @@ export default function SignupDialog({ open, onOpenChange }: SignupDialogProps) 
   }
 
   useEffect(() => {
-    // Clear form-level error when inputs change
-    if (errors.form) {
-        // By typing the state, TypeScript now understands the shape here, fixing the error.
-        setErrors(({ form, ...rest }) => rest);
-    }
     validate(false)
   }, [username, email, password, confirmPassword, touched])
 
@@ -122,39 +115,53 @@ export default function SignupDialog({ open, onOpenChange }: SignupDialogProps) 
       confirmPassword: true,
     })
 
-    if (validate(true)) {
-      try {
-        const response = await fetch("/api/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, email, password }),
-        })
-
-        const data = await response.json()
-
-        if (!response.ok) {
-          setErrors({ ...errors, form: data.message || "An unknown error occurred." })
-          return
-        }
-
-        const signInResponse = await signIn("credentials", {
-          redirect: false,
-          email,
-          password,
-        })
-
-        if (signInResponse?.error) {
-          setErrors({ ...errors, form: `Sign-in failed: ${signInResponse.error}` })
-          return
-        }
-
-        onOpenChange(false)
-
-      } catch (error) {
-        console.error("Signup fetch error:", error)
-        setErrors({ ...errors, form: "Could not connect to the server." })
-      }
+    if (!validate(true)) {
+      return
     }
+
+    setIsLoading(true)
+
+    const signupPromise = async () => {
+      const response = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || "Προέκυψε ένα άγνωστο σφάλμα κατά την εγγραφή.")
+      }
+
+      const signInResponse = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      })
+
+      if (signInResponse?.error) {
+        throw new Error(
+          `Η σύνδεση απέτυχε μετά την εγγραφή: ${signInResponse.error}`
+        )
+      }
+
+      return { success: true }
+    }
+
+    toast.promise(signupPromise(), {
+      loading: "Δημιουργία λογαριασμού...",
+      success: () => {
+        onOpenChange(false)
+        return "Ο λογαριασμός σας δημιουργήθηκε με επιτυχία!"
+      },
+      error: err => {
+        return err.message
+      },
+      finally: () => {
+        setIsLoading(false)
+      },
+    })
   }
 
   const passwordLengthCheck = password.length >= 5
@@ -286,14 +293,11 @@ export default function SignupDialog({ open, onOpenChange }: SignupDialogProps) 
               )}
             </div>
           </div>
-          {errors.form && (
-            <p className="text-red-500 text-sm text-center mb-4">{errors.form}</p>
-          )}
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="neutral">Άκυρο</Button>
+              <Button variant="neutral" disabled={isLoading}>Άκυρο</Button>
             </DialogClose>
-            <Button type="submit">Εγγραφή</Button>
+            <Button type="submit" disabled={isLoading}>Εγγραφή</Button>
           </DialogFooter>
         </form>
       </DialogContent>

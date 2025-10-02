@@ -10,14 +10,14 @@ export default async function handler(
 ) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
-    return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
+    return res.status(405).json({ message: `Η μέθοδος ${req.method} δεν επιτρέπεται` });
   }
 
   try {
     const { email, password, username } = req.body;
 
     if (!email || !password || !username) {
-      return res.status(400).json({ message: 'Email, password, and username are required.' });
+      return res.status(400).json({ message: 'Το email, ο κωδικός πρόσβασης και το όνομα χρήστη είναι υποχρεωτικά.' });
     }
 
     const existingUser = await prisma.user.findFirst({
@@ -30,7 +30,7 @@ export default async function handler(
     });
 
     if (existingUser) {
-      return res.status(409).json({ message: 'User with this email or username already exists.' });
+      return res.status(409).json({ message: 'Ο χρήστης με αυτό το email ή το όνομα χρήστη υπάρχει ήδη.' });
     }
 
     const passwordHash = await hashPassword(password);
@@ -51,6 +51,6 @@ export default async function handler(
 
   } catch (error) {
     console.error('Signup API error:', error);
-    res.status(500).json({ message: 'An error occurred while creating the user.' });
+    res.status(500).json({ message: 'Προέκυψε σφάλμα κατά τη δημιουργία του χρήστη.' });
   }
 }

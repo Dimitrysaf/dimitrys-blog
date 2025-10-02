@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import React, { useState } from "react"
 import { signIn } from "next-auth/react"
+import { toast } from "sonner"
 
 interface LoginDialogProps {
   open: boolean
@@ -23,23 +24,35 @@ interface LoginDialogProps {
 export default function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
+    setIsLoading(true)
 
-    const result = await signIn("credentials", {
+    const promise = signIn("credentials", {
       redirect: false,
       email,
       password,
     })
 
-    if (result?.error) {
-      setError("Τα στοιχεία δεν είναι σωστά. Παρακαλώ δοκιμάστε ξανά.")
-    } else if (result?.ok) {
-      onOpenChange(false)
-    }
+    toast.promise(promise, {
+      loading: "Σύνδεση...",
+      success: result => {
+        if (result?.ok) {
+          onOpenChange(false)
+          return `Έχετε συνδεθεί ως ${email}`
+        } else {
+          throw new Error(result?.error || "Τα στοιχεία δεν είναι σωστά.")
+        }
+      },
+      error: err => {
+        return err.message || "Τα στοιχεία δεν είναι σωστά. Παρακαλώ δοκιμάστε ξανά."
+      },
+      finally: () => {
+        setIsLoading(false)
+      },
+    })
   }
 
   return (
@@ -77,13 +90,12 @@ export default function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                 required
               />
             </div>
-            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="neutral">Άκυρο</Button>
+              <Button variant="neutral" disabled={isLoading}>Άκυρο</Button>
             </DialogClose>
-            <Button type="submit">Σύνδεση</Button>
+            <Button type="submit" disabled={isLoading}>Σύνδεση</Button>
           </DialogFooter>
         </form>
       </DialogContent>
