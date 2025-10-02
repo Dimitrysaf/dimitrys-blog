@@ -55,7 +55,7 @@ const HomePage = ({ posts }: HomePageProps) => {
   return (
     <Container>
       <main className="container mx-auto py-8">
-        <ImageGrid items={imageGridItems} />
+        <ImageGrid items={imageGridItems} isLoading={false} />
       </main>
     </Container>
   );

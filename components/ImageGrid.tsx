@@ -19,6 +19,7 @@ import {
     PaginationNext,
     PaginationPrevious,
   } from '@/components/ui/pagination';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ImageGridItem {
   imageUrl: string;
@@ -28,9 +29,23 @@ interface ImageGridItem {
 
 interface ImageGridProps {
   items: ImageGridItem[];
+  isLoading: boolean;
 }
 
-const ImageGrid: React.FC<ImageGridProps> = ({ items }) => {
+const ImageGridSkeleton = () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="flex flex-col space-y-3">
+                <Skeleton className="h-[280px] w-full rounded-xl" />
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                </div>
+            </div>
+        ))}
+    </div>
+);
+
+const ImageGrid: React.FC<ImageGridProps> = ({ items, isLoading }) => {
   const [sortOption, setSortOption] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
@@ -70,6 +85,10 @@ const ImageGrid: React.FC<ImageGridProps> = ({ items }) => {
   const handlePageClick = (e: React.MouseEvent, page: number) => {
     e.preventDefault();
     setCurrentPage(page);
+  }
+
+  if (isLoading) {
+    return <ImageGridSkeleton />;
   }
 
   return (
