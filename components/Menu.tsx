@@ -88,15 +88,6 @@ export default function Menu() {
                   <User className="mr-2 h-4 w-4" />
                   <span>Ο λογαριασμός μου</span>
                 </DropdownMenuItem>
-                <AlertDialogTrigger asChild>
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    onSelect={event => event.preventDefault()}
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Αποσύνδεση</span>
-                  </DropdownMenuItem>
-                </AlertDialogTrigger>
               </DropdownMenuGroup>
             ) : (
               <DropdownMenuGroup>
@@ -121,11 +112,25 @@ export default function Menu() {
             <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
               <DropdownMenuLabel>
                 <Palette className="mr-2 h-4 w-4 inline-block" />
-                <span>Θέμα</span>
+                <span>Εμφάνιση</span>
               </DropdownMenuLabel>
               <DropdownMenuRadioItem value="light">Φωτεινό</DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="dark">Σκοτεινό</DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
+            {isLoggedIn && (
+              <>
+                <DropdownMenuSeparator />
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onSelect={event => event.preventDefault()}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Αποσύνδεση</span>
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
         <AlertDialogContent>
