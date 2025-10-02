@@ -148,7 +148,7 @@ export default function SettingsDialog({
             <Input
               id="username"
               name="username"
-              placeholder="Όνομα χρήστη"
+              placeholder="Γιώργος Παρασκευατυρόπυτας"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               disabled={isLoading}
