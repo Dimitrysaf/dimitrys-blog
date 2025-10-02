@@ -149,7 +149,6 @@ export default function SignupDialog({ open, onOpenChange }: SignupDialogProps) 
         }
 
         onOpenChange(false)
-        window.location.reload()
 
       } catch (error) {
         console.error("Signup fetch error:", error)

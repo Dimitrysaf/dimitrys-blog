@@ -27,21 +27,18 @@ export default function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null) // Clear previous errors
+    setError(null)
 
     const result = await signIn("credentials", {
-      redirect: false, // We want to handle the result in our code
+      redirect: false,
       email,
       password,
     })
 
     if (result?.error) {
-      // If next-auth returns an error, display it
       setError("Τα στοιχεία δεν είναι σωστά. Παρακαλώ δοκιμάστε ξανά.")
     } else if (result?.ok) {
-      // If login is successful, close the dialog and reload the page
       onOpenChange(false)
-      window.location.reload()
     }
   }
 
