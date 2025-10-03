@@ -14,16 +14,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  SidebarProvider,
-  SidebarInset,
-} from "@/components/ui/sidebar"
-import { AppSidebar } from '@/components/AppSidebar'
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [isScreenTooSmall, setIsScreenTooSmall] = React.useState(false)
+  const [showScreenSizeAlert, setShowScreenSizeAlert] = React.useState(true);
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -35,16 +31,10 @@ export default function Dashboard() {
     }
 
     window.addEventListener('resize', handleResize)
-
-    // Call handler right away so state gets updated with initial window size
     handleResize()
-
-    // Remove event listener on cleanup
     return () => window.removeEventListener('resize', handleResize)
-  }, []) // Empty array ensures that effect is only run on mount and unmount
+  }, [])
 
-
-  // Render a skeleton loading state while the session is being checked.
   if (status === 'loading') {
     return (
       <div className="p-4">
@@ -58,61 +48,55 @@ export default function Dashboard() {
     )
   }
 
-  // If the screen is small, show an alert dialog.
-  if (isScreenTooSmall) {
+  const roleId = (session?.user as any)?.roleId
+  const isAuthorized = status === 'authenticated' && roleId !== undefined && roleId >= 2
+
+  if (!isAuthorized) {
     return (
       <AlertDialog open={true}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Μη συμβατό</AlertDialogTitle>
+            <AlertDialogTitle>Δεν έχετε πρόσβαση</AlertDialogTitle>
             <AlertDialogDescription>
-              Η συσκευή ή η οθόνη της συσκευής δεν είναι αρκετά μεγάλη για να φανεί η σελίδα.
+              Χρειάζεστε να είστε είτε διαχειριστής είτε αρθρογράφος. Παρακαλώ
+              επικοινωνήστε με το διαχειρηστή για να σας προσθέσει τον ρόλο
+              του αρθουγράφου.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => router.push('/')}>Εντάξει</AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <a href="mailto:demetresmeliates+help@gmail.com">Επικοινωνήστε...</a>
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     )
   }
 
-  const roleId = (session?.user as any)?.roleId
-  const isAuthorized = status === 'authenticated' && roleId !== undefined && roleId >= 2
-
-  // If the user is authorized, render the dashboard content with the sidebar.
-  if (isAuthorized) {
-    return (
-      <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-            {/* The content for each tab will go here as separate components */}
-          </div>
-        </SidebarInset>
-      </SidebarProvider>
-    )
-  }
-
-  // If the user is not authorized, show a permanent alert dialog.
   return (
-    <AlertDialog open={true}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Δεν έχετε πρόσβαση</AlertDialogTitle>
-          <AlertDialogDescription>
-            Χρειάζεστε να είστε είτε διαχειριστής είτε αρθρογράφος. Παρακαλώ
-            επικοινωνήστε με το διαχειρηστή για να σας προσθέσει τον ρόλο
-            του αρθουγράφου.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => router.push('/')}>Εντάξει</AlertDialogCancel>
-          <AlertDialogAction asChild>
-            <a href="mailto:admin@example.com">Επικοινωνήστε...</a>
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <>
+      {isScreenTooSmall && showScreenSizeAlert && (
+        <AlertDialog open={true} onOpenChange={setShowScreenSizeAlert}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Μη συμβατό</AlertDialogTitle>
+              <AlertDialogDescription>
+                Η συσκευή ή η οθόνη της συσκευής δεν είναι αρκετά μεγάλη για να φανεί η σελίδα.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => router.push('/')}>Εντάξει</AlertDialogCancel>
+              <AlertDialogAction onClick={() => setShowScreenSizeAlert(false)}>
+                Φύγε απο 'δω
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        {/* The content for each tab will go here as separate components */}
+      </div>
+    </>
   )
 }
