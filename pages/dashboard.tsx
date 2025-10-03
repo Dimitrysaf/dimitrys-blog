@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
+import Posts from '@/components/Posts'
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
@@ -95,7 +96,7 @@ export default function Dashboard() {
         </AlertDialog>
       )}
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        {/* The content for each tab will go here as separate components */}
+        <Posts />
       </div>
     </>
   )
