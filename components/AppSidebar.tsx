@@ -2,8 +2,8 @@
 
 import * as React from 'react'
 import { useSession } from 'next-auth/react'
-import { Newspaper } from 'lucide-react'
-import Link from 'next/link' // Using Next.js Link for client-side navigation
+import { Newspaper, Home } from 'lucide-react'
+import Link from 'next/link'
 
 import {
   Sidebar,
@@ -33,9 +33,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {isAuthorized && (
           <SidebarMenu>
             <SidebarMenuItem>
-              {/* This is now a single item, not a group, and uses Link to prevent page reloads */}
               <SidebarMenuButton asChild>
                 <Link href="/dashboard">
+                  <Home size={20} />
+                  <span>Ταμπλό</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/dashboard#posts">
                   <Newspaper size={20} />
                   <span>Αναρτήσεις</span>
                 </Link>

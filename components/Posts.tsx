@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Skeleton } from '@/components/ui/skeleton'
 
 async function getData(): Promise<Post[]> {
   const res = await fetch('/api/posts')
@@ -23,6 +24,25 @@ async function getData(): Promise<Post[]> {
   }
   return res.json()
 }
+
+// Simplified skeleton with horizontal bars and top bar for controls
+const SimpleSkeleton = () => (
+    <div className="container mx-auto py-10">
+        <Skeleton className="h-12 w-48 mb-4" />
+        <div className="flex justify-between items-center mb-4">
+            <Skeleton className="h-10 w-72" />
+            <Skeleton className="h-10 w-40" />
+        </div>
+        <div className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+        </div>
+    </div>
+);
+
 
 export const columns: ColumnDef<Post>[] = [
   {
@@ -154,17 +174,18 @@ export default function Posts() {
   }, [])
 
   if (loading) {
-    return <div>Loading...</div>
+    return <SimpleSkeleton />
   }
 
   return (
     <div className="container mx-auto py-10">
+      <h1 className="text-2xl font-bold mb-4">Αναρτήσεις</h1>
       <DataTable
         columns={columns}
         data={data}
         emptyStateMessage="Καμία εγγραφή στην βάση δεδομένων"
         filterColumn="title"
-        filterPlaceholder="Φίλτρο τίτλων..."
+        filterPlaceholder="Φίλτρο τίτlων..."
       />
     </div>
   )
