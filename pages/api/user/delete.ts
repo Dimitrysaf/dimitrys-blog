@@ -39,10 +39,6 @@ export default async function handle(
       return res.status(401).json({ message: 'Incorrect password' })
     }
 
-    await prisma.session.deleteMany({
-        where: { userId: session.user.id },
-    });
-
     await prisma.user.delete({
       where: { id: session.user.id },
     })
